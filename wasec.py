@@ -16,8 +16,21 @@ from requests import Session
 INTERESTING_HEADERS = ('access-control-allow-origin', 'server', 'set-cookie',
                        'via', 'x-backend-server', 'x-powered-by')
 
-M_RE = r'[\w\.-]+@[\w\.-]+\.\w+'
-P_RE = r'\+?\d{1,4}?[-\s]?\(?\d{1,3}?\)?[-\s]?\d{1,4}[-\s]?\d{1,4}[-\s]?\d{1,9}'
+contact_res = {
+    'M_RE': r'[\w\.-]+@[\w\.-]+\.\w{2,5}',
+    'NT_RE': r'\+\d{0,3}\s?0?\d{7,10}',
+    'NT2_RE': r'\+?\d{0,3}?\s?0?\d{3}\s\d{3}\s\d{3}',
+    'NT3_RE': r'\+?\(?\d{0,3}\)?\s?0?\d{3}\s\d{4}',
+    'FP_RE': r'facebook.com[-\.A-Za-z0-9/]+',
+    'FP2_RE': r'fb.me[-\.A-Za-z0-9/]+',
+    'TP_RE': r'twitter.com[-\._A-Za-z0-9/]+',
+    'LP_RE': r'linkedin.com[-\._A-Za-z0-9/]+',
+    'AW_RE': r'api.whatsapp.com/send\?phone=([\d]+)',
+    'WW_RE': r'web.whatsapp.com/send\?phone=([\d]+)',
+    'WW2_RE': r'wa.me/([\d]+)',
+    'UT_RE': r't.me/[-\._A-Za-z0-9/]+',
+}
+
 D_RE = r'^Disallow: (.*)$'
 
 RANDOM_PATH = '/' + ''.join(choices(ascii_lowercase, k=12))
@@ -79,15 +92,14 @@ def main(target):
     print('=' * 40, BANNER, '=' * 40, sep='\n')
     print('Target:', target)
     disallow_res = {'Disallows': D_RE}
-    contact_res = {'Mails': M_RE, 'Phones': P_RE}
     loot = []
 
     domains = set()
     d_new = set(get_domains(target))
     while d_new:
         domains |= d_new
-        d_new ^= domains
         d_new = {dn for d in d_new for dn in get_domains('https://%s' % d)}
+        d_new ^= domains
     loot.append({'Domains': domains})
 
     check(target, '/', contact_res)
