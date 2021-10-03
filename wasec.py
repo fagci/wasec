@@ -57,6 +57,25 @@ def check(target, path='/', res={}):
 
     return r, res_results
 
+def get_domains(target):
+    domains = set()
+
+    pu = urlparse(target)
+
+    ip = gethostbyname(pu.hostname or '')
+
+    with suppress():
+        domains.add(gethostbyaddr(ip)[0])
+
+    context = _create_unverified_context()
+
+    with suppress():
+        with context.wrap_socket(socket()) as c:
+            c.connect((pu.hostname, pu.port or 443))
+            for _, d in c.getpeercert().get('subjectAltName', []):
+                domains.add(d)
+
+    return domains
 
 def main(target):
     colorama_init()
@@ -67,20 +86,7 @@ def main(target):
     contact_res = {'Mails': M_RE, 'Phones': P_RE}
     loot = []
 
-    pu = urlparse(target)
-
-    ip = gethostbyname(pu.hostname or '')
-
-    with suppress():
-        loot.append({'Domains': {gethostbyaddr(ip)[0]}})
-
-    context = _create_unverified_context()
-
-    with suppress():
-        with context.wrap_socket(socket()) as c:
-            c.connect((pu.hostname, pu.port or 443))
-            domains = c.getpeercert().get('subjectAltName', {})
-            loot.append({'Domains': {v for _, v in domains}})
+    loot.append({'Domains': get_domains(target)})
 
     check(target, '/', contact_res)
     check(target, RANDOM_PATH, contact_res)
