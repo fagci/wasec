@@ -18,11 +18,11 @@ INTERESTING_HEADERS = ('access-control-allow-origin', 'server', 'set-cookie',
 
 analytics_res = {
     'adsense': r'pub-\d+',
-    'google': r'ua-[0-9-]+',
+    'google_analytics': r'ua-[0-9-]+',
     'googleTagManager': r'gtm-[^&\'"%]+',
-    'mail.ru': r'top.mail.ru[^\'"]+from=(\d+)',
+    'mailru_counter': r'top.mail.ru[^\'"]+from=(\d+)',
     'yandexMetrika': r'metrika.yandex[^\'"]+?id=(\d+)',
-    'vk': r'vk-[^&"\'%]+',
+    'vk_retarget': r'vk-[^&"\'%]+',
 }
 
 contact_res = {
