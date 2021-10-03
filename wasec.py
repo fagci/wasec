@@ -80,10 +80,8 @@ def main(target):
         with context.wrap_socket(socket()) as c:
             c.connect((pu.hostname, pu.port or 443))
             ssl_info = c.getpeercert()
-            loot.append({
-                'Domains': {v
-                            for _, v in ssl_info.get('subjectAltName', {})}
-            })
+            domains = ssl_info.get('subjectAltName', {})
+            loot.append({'Domains': {v for _, v in domains}})
 
     check(target, '/', contact_res)
     check(target, RANDOM_PATH, contact_res)
