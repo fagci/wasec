@@ -64,10 +64,10 @@ def get_domains(target):
     pu = urlparse(target)
     ip = gethostbyname(pu.hostname or '')
 
-    with suppress():
+    with suppress(Exception):
         yield gethostbyaddr(ip)[0]
 
-    with suppress():
+    with suppress(Exception):
         with unverified_context.wrap_socket(socket()) as c:
             c.connect((pu.hostname, pu.port or 443))
             for _, d in c.getpeercert().get('subjectAltName', []):
