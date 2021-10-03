@@ -43,6 +43,8 @@ contact_res = {
     'Whatsapp2': r'web\.whatsapp\.com/send\?phone=([\d]+)',
     'Whatsapp3': r'wa\.me/([\d]+)',
     'YouTube': r'youtube\.\w+?/channel/[^"\']+',
+    'tel': r'tel:(\+?[^\'"<>]+)',
+    'mailto': r'mailto:(\+?[^\'"<>]+)',
 }
 
 D_RE = r'^Disallow: (.*)$'
