@@ -37,6 +37,8 @@ __      ____ _ ___  ___  ___
 session = Session()
 session.headers['User-Agent'] = 'Mozilla/5.0'
 
+unverified_context = _create_unverified_context()
+
 
 def check(target, path='/', res={}):
     uri = f'{target}{path}'
@@ -68,10 +70,8 @@ def get_domains(target):
     with suppress():
         domains.add(gethostbyaddr(ip)[0])
 
-    context = _create_unverified_context()
-
     with suppress():
-        with context.wrap_socket(socket()) as c:
+        with unverified_context.wrap_socket(socket()) as c:
             c.connect((pu.hostname, pu.port or 443))
             for _, d in c.getpeercert().get('subjectAltName', []):
                 domains.add(d)
