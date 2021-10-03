@@ -32,7 +32,7 @@ contact_res = {
     'Github': r'github\.com/[^"\'/]+',
     'Instagram': r'instagram\.com/[^"\'/]+',
     'Linkedin': r'linkedin.com[-._A-Za-z0-9/]+',
-    'Mails': r'[\w.-]+@[\w\.-]+\.\w{2,5}',
+    'Mails': r'[\w.-]+@[\w.-]+\.\w{2,5}',
     'OK': r'ok\.ru/[^"\'/]+',
     'Phones': r'\+\d{0,3}\s?0?\d{7,10}',
     'Phones2': r'\+?\d{0,3}?\s?0?\d{3}\s\d{3}\s\d{3}',
