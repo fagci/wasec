@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from html import unescape
-from random import sample
+from random import choices
 from re import MULTILINE, findall
 from string import ascii_lowercase
 from sys import argv
@@ -11,7 +11,7 @@ from requests import Session
 M_RE = r'[\w\.-]+@[\w\.-]+\.\w+'
 P_RE = r'\+?\d{1,4}?[-\s]?\(?\d{1,3}?\)?[-\s]?\d{1,4}[-\s]?\d{1,4}[-\s]?\d{1,9}'
 D_RE = r'^Disallow: (.*)$'
-FAKE_PATH = '/' + ''.join(sample(ascii_lowercase, 12))
+FAKE_PATH = '/' + ''.join(choices(ascii_lowercase, k=12))
 session = Session()
 
 
