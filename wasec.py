@@ -62,7 +62,6 @@ def check(target, path='/', res={}):
 
 def get_domains(target):
     pu = urlparse(target)
-
     ip = gethostbyname(pu.hostname or '')
 
     with suppress():
@@ -79,21 +78,28 @@ def main(target):
     colorama_init()
     print('=' * 40, BANNER, '=' * 40, sep='\n')
     print('Target:', target)
+    disallow_res = {'Disallows': D_RE}
     contact_res = {'Mails': M_RE, 'Phones': P_RE}
     loot = []
 
-    loot.append({'Domains': set(get_domains(target))})
+    domains = set()
+    d_new = set(get_domains(target))
+    while d_new:
+        domains |= d_new
+        d_new ^= domains
+        d_new = {dn for d in d_new for dn in get_domains('https://%s' % d)}
+    loot.append({'Domains': domains})
 
     check(target, '/', contact_res)
     check(target, RANDOM_PATH, contact_res)
 
-    response, res = check(target, '/robots.txt', {'Disallows': D_RE})
+    print('Disallows:', '-' * 29)
+
+    response, res = check(target, '/robots.txt', disallow_res)
     for hk, hv in response.headers.lower_items():
         if hk in INTERESTING_HEADERS:
             loot.append({'Headers': {f'{hk}: {hv}'}})
     loot.append(res)
-
-    print('Disallows:', '-' * 29)
 
     for path in res.get('Disallows', []):
         _, res = check(target, path, contact_res)
