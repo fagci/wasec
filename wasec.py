@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 from collections import defaultdict
+from contextlib import suppress
 from html import unescape
 from random import choices
 from re import MULTILINE, findall
-from socket import gethostbyaddr, gethostbyname, socket
+from socket import gethostbyaddr, gethostbyname, setdefaulttimeout, socket
+from ssl import _create_unverified_context
 from string import ascii_lowercase
 from sys import argv
 from urllib.parse import urlparse
-from ssl import _create_unverified_context
 
 from colorama import Fore, init as colorama_init
 from requests import Session
@@ -69,23 +70,20 @@ def main(target):
     pu = urlparse(target)
 
     ip = gethostbyname(pu.hostname or '')
-    try:
+
+    with suppress():
         loot.append({'Domains': {gethostbyaddr(ip)[0]}})
-    except:
-        pass
 
     context = _create_unverified_context()
 
-    try:
+    with suppress():
         with context.wrap_socket(socket()) as c:
-            c.settimeout(2)
-            c.connect((pu.hostname, pu.port or (443 if pu.scheme == 'https' else 80)))
-
+            c.connect((pu.hostname, pu.port or 443))
             ssl_info = c.getpeercert()
-
-            loot.append({'Domains': {v for _, v in ssl_info.get('subjectAltName', {})}})
-    except:
-        pass
+            loot.append({
+                'Domains': {v
+                            for _, v in ssl_info.get('subjectAltName', {})}
+            })
 
     check(target, '/', contact_res)
     check(target, RANDOM_PATH, contact_res)
@@ -119,4 +117,5 @@ def main(target):
 
 
 if __name__ == '__main__':
+    setdefaulttimeout(2)
     main(argv[1])
