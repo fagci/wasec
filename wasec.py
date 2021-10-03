@@ -10,6 +10,7 @@ from string import ascii_lowercase
 from sys import argv
 from urllib.parse import urlparse
 
+from bs4 import BeautifulSoup
 from colorama import Fore, init as colorama_init
 from requests import Session
 
@@ -118,7 +119,12 @@ def main(target):
         d_new ^= domains
     loot.append({'Domains': domains})
 
-    check(target, '/', {**contact_res, **analytics_res})
+    response, _ = check(target, '/', {**contact_res, **analytics_res})
+    s = BeautifulSoup(response.text, 'html.parser')
+    for m in s('meta'):
+        if m.get('name', '') in ('generator',):
+            loot.append({'Meta_%s' % m['name']: {m.get('content', '-')}})
+
     check(target, RANDOM_PATH, contact_res)
 
     print('Disallows:', '-' * 29)
