@@ -9,6 +9,8 @@ from sys import argv
 from colorama import Fore, init as colorama_init
 from requests import Session
 
+INTERESTING_HEADERS = ('server', 'x-powered-by')
+
 M_RE = r'[\w\.-]+@[\w\.-]+\.\w+'
 P_RE = r'\+?\d{1,4}?[-\s]?\(?\d{1,3}?\)?[-\s]?\d{1,4}[-\s]?\d{1,4}[-\s]?\d{1,9}'
 D_RE = r'^Disallow: (.*)$'
@@ -40,7 +42,8 @@ def check(target, path='/', res={}):
     s_c = STATUS_COLORS[r.status_code // 100]
 
     print(f'\r{s_c}[i]', r.status_code, f'{path:<17}',
-          f'{len(r.content):>8,}'.replace(',', ' '), 'bytes', Fore.RESET)
+          f'{len(r.content):>8,}'.replace(',', ' '), 'bytes',
+          f'{round(r.elapsed.total_seconds() * 1000):>4}', 'ms', Fore.RESET)
 
     res_results = {}
     for k, re in res.items():
@@ -60,7 +63,10 @@ def main(target):
     loot = []
 
     check(target, '/', contact_res)
-    _, res = check(target, '/robots.txt', {'Disallows': D_RE})
+    response, res = check(target, '/robots.txt', {'Disallows': D_RE})
+    for hk, hv in response.headers.lower_items():
+        if hk in INTERESTING_HEADERS:
+            loot.append({'Headers': {f'{hk}: {hv}'}})
     loot.append(res)
 
     print('Disallows:', '-' * 29)
