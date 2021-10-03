@@ -57,6 +57,7 @@ def check(target, path='/', res={}):
 
     return r, res_results
 
+
 def get_domains(target):
     domains = set()
 
@@ -77,11 +78,10 @@ def get_domains(target):
 
     return domains
 
+
 def main(target):
     colorama_init()
-    print('=' * 40)
-    print(BANNER)
-    print('=' * 40)
+    print('=' * 40, BANNER, '=' * 40, sep='\n')
     print('Target:', target)
     contact_res = {'Mails': M_RE, 'Phones': P_RE}
     loot = []
@@ -112,13 +112,16 @@ def main(target):
 
     loot_all = defaultdict(set)
 
+    print('Loot:', '=' * 34)
+
     for part in loot:
         for k, v in part.items():
             loot_all[k] |= v
 
-    print('Loot:', '=' * 34)
     for k, v in loot_all.items():
-        print(f'{Fore.GREEN}[+]{Fore.WHITE} {k}:{Fore.RESET} {", ".join(v)}')
+        if v:
+            items = ", ".join(v)
+            print(f'{Fore.GREEN}[+]{Fore.WHITE} {k}:{Fore.RESET} {items}')
 
 
 if __name__ == '__main__':
