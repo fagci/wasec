@@ -61,22 +61,18 @@ def check(target, path='/', res={}):
 
 
 def get_domains(target):
-    domains = set()
-
     pu = urlparse(target)
 
     ip = gethostbyname(pu.hostname or '')
 
     with suppress():
-        domains.add(gethostbyaddr(ip)[0])
+        yield gethostbyaddr(ip)[0]
 
     with suppress():
         with unverified_context.wrap_socket(socket()) as c:
             c.connect((pu.hostname, pu.port or 443))
             for _, d in c.getpeercert().get('subjectAltName', []):
-                domains.add(d)
-
-    return domains
+                yield d
 
 
 def main(target):
@@ -86,7 +82,7 @@ def main(target):
     contact_res = {'Mails': M_RE, 'Phones': P_RE}
     loot = []
 
-    loot.append({'Domains': get_domains(target)})
+    loot.append({'Domains': set(get_domains(target))})
 
     check(target, '/', contact_res)
     check(target, RANDOM_PATH, contact_res)
