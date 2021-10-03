@@ -9,14 +9,15 @@ from sys import argv
 from colorama import Fore, init as colorama_init
 from requests import Session
 
-INTERESTING_HEADERS = ('server', 'x-powered-by')
+INTERESTING_HEADERS = ('access-control-allow-origin', 'server', 'set-cookie',
+                       'via', 'x-backend-server', 'x-powered-by')
 
 M_RE = r'[\w\.-]+@[\w\.-]+\.\w+'
 P_RE = r'\+?\d{1,4}?[-\s]?\(?\d{1,3}?\)?[-\s]?\d{1,4}[-\s]?\d{1,4}[-\s]?\d{1,9}'
 D_RE = r'^Disallow: (.*)$'
 
-FAKE_PATH = '/' + ''.join(choices(ascii_lowercase, k=12))
-PATHS = (FAKE_PATH, '/.htaccess', '/.git/HEAD', '/../../../../../etc/passwd')
+RANDOM_PATH = '/' + ''.join(choices(ascii_lowercase, k=12))
+PATHS = ('/.htaccess', '/.git/HEAD', '/../../../../../etc/passwd')
 
 STATUS_COLORS = [
     Fore.WHITE, Fore.GREEN, Fore.GREEN, Fore.BLUE, Fore.WHITE, Fore.RED
@@ -63,6 +64,7 @@ def main(target):
     loot = []
 
     check(target, '/', contact_res)
+    check(target, RANDOM_PATH, contact_res)
     response, res = check(target, '/robots.txt', {'Disallows': D_RE})
     for hk, hv in response.headers.lower_items():
         if hk in INTERESTING_HEADERS:
