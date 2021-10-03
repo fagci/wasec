@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 from html import unescape
 from random import sample
-from re import findall, MULTILINE
+from re import MULTILINE, findall
 from string import ascii_lowercase
 from sys import argv
 
-from colorama import init as colorama_init, Fore
+from colorama import Fore, init as colorama_init
 from requests import Session
 
 M_RE = r'[\w\.-]+@[\w\.-]+\.\w+'
-P_RE = r'(\d{3}[-\.\s]??\d{3}[-\.\s]??\d{4}|\(\d{3}\)\s*\d{3}[-\.\s]??\d{4}|\d{3}[-\.\s]??\d{4})'
+P_RE = r'\+?\d{1,4}?[-\s]?\(?\d{1,3}?\)?[-\s]?\d{1,4}[-\s]?\d{1,4}[-\s]?\d{1,9}'
 D_RE = r'^Disallow: (.*)$'
 FAKE_PATH = '/' + ''.join(sample(ascii_lowercase, 12))
 session = Session()
@@ -25,7 +25,7 @@ def check(uri, res={}):
         items = set(findall(re, unescape(r.text), MULTILINE))
         if items:
             res_results[k] = items
-            print(f'  {Fore.GREEN}[+] {k}:{Fore.RESET}', *items)
+            print(f'  {Fore.GREEN}[+] {k}:{Fore.RESET}', ', '.join(items))
 
     return r, res_results
 
@@ -43,7 +43,6 @@ def main(target):
     for path in res.get('Disallows', []):
         uri = f'{target}{path}'
         check(uri, {'Mails': M_RE, 'Phones': P_RE})
-
 
     for path in paths:
         uri = f'{target}{path}'
