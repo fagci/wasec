@@ -16,19 +16,34 @@ from requests import Session
 INTERESTING_HEADERS = ('access-control-allow-origin', 'server', 'set-cookie',
                        'via', 'x-backend-server', 'x-powered-by')
 
+analytics_res = {
+    'adsense': r'pub-\d+',
+    'google': r'ua-[0-9-]+',
+    'googleTagManager': r'gtm-[^&\'"%]+',
+    'mail.ru': r'top.mail.ru[^\'"]+from=(\d+)',
+    'yandexMetrika': r'metrika.yandex[^\'"]+?id=(\d+)',
+    'vk': r'vk-[^&"\'%]+',
+}
+
 contact_res = {
-    'M_RE': r'[\w\.-]+@[\w\.-]+\.\w{2,5}',
+    'M_RE': r'[\w.-]+@[\w\.-]+\.\w{2,5}',
     'NT_RE': r'\+\d{0,3}\s?0?\d{7,10}',
     'NT2_RE': r'\+?\d{0,3}?\s?0?\d{3}\s\d{3}\s\d{3}',
     'NT3_RE': r'\+?\(?\d{0,3}\)?\s?0?\d{3}\s\d{4}',
-    'FP_RE': r'facebook.com[-\.A-Za-z0-9/]+',
-    'FP2_RE': r'fb.me[-\.A-Za-z0-9/]+',
-    'TP_RE': r'twitter.com[-\._A-Za-z0-9/]+',
-    'LP_RE': r'linkedin.com[-\._A-Za-z0-9/]+',
-    'AW_RE': r'api.whatsapp.com/send\?phone=([\d]+)',
-    'WW_RE': r'web.whatsapp.com/send\?phone=([\d]+)',
-    'WW2_RE': r'wa.me/([\d]+)',
-    'UT_RE': r't.me/[-\._A-Za-z0-9/]+',
+    'FP_RE': r'facebook\.com[-.A-Za-z0-9/]+',
+    'FP2_RE': r'fb\.me[-.A-Za-z0-9/]+',
+    'TP_RE': r'twitter\.com[-._A-Za-z0-9/]+',
+    'LP_RE': r'linkedin.com[-._A-Za-z0-9/]+',
+    'AW_RE': r'api\.whatsapp\.com/send\?phone=([\d]+)',
+    'WW_RE': r'web\.whatsapp\.com/send\?phone=([\d]+)',
+    'WW2_RE': r'wa\.me/([\d]+)',
+    'UT_RE': r't\.me/[-._A-Za-z0-9/]+',
+    'facebook': r'facebook\.com[^"\'/]+',
+    'github': r'github\.com/[^"\'/]+',
+    'instagram': r'instagram\.com/[^"\'/]+',
+    'ok': r'ok\.ru/[^"\'/]+',
+    'vk': r'vk\.com/[^"\'/]+',
+    'youtube': r'youtube\.\w+?/channel/[^"\']+',
 }
 
 D_RE = r'^Disallow: (.*)$'
@@ -102,7 +117,7 @@ def main(target):
         d_new ^= domains
     loot.append({'Domains': domains})
 
-    check(target, '/', contact_res)
+    check(target, '/', {**contact_res, **analytics_res})
     check(target, RANDOM_PATH, contact_res)
 
     print('Disallows:', '-' * 29)
