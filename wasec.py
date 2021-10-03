@@ -3,8 +3,11 @@ from collections import defaultdict
 from html import unescape
 from random import choices
 from re import MULTILINE, findall
+from socket import gethostbyaddr, gethostbyname, socket
 from string import ascii_lowercase
 from sys import argv
+from urllib.parse import urlparse
+from ssl import _create_unverified_context
 
 from colorama import Fore, init as colorama_init
 from requests import Session
@@ -17,7 +20,8 @@ P_RE = r'\+?\d{1,4}?[-\s]?\(?\d{1,3}?\)?[-\s]?\d{1,4}[-\s]?\d{1,4}[-\s]?\d{1,9}'
 D_RE = r'^Disallow: (.*)$'
 
 RANDOM_PATH = '/' + ''.join(choices(ascii_lowercase, k=12))
-PATHS = ('/.htaccess', '/.git/HEAD', '/../../../../../etc/passwd')
+PATHS = ('/admin', '/phpinfo.php', '/.env', '/.htaccess', '/.git/HEAD',
+         '/../../../../../etc/passwd')
 
 STATUS_COLORS = [
     Fore.WHITE, Fore.GREEN, Fore.GREEN, Fore.BLUE, Fore.WHITE, Fore.RED
@@ -27,9 +31,7 @@ BANNER = r"""
 __      ____ _ ___  ___  ___ 
 \ \ /\ / / _` / __|/ _ \/ __|
  \ V  V / (_| \__ \  __/ (__ 
-  \_/\_/ \__,_|___/\___|\___| by fagci
-                             
-""".strip()
+  \_/\_/ \__,_|___/\___|\___| by fagci""".lstrip()
 
 session = Session()
 session.headers['User-Agent'] = 'Mozilla/5.0'
@@ -60,8 +62,30 @@ def main(target):
     print('=' * 40)
     print(BANNER)
     print('=' * 40)
+    print('Target:', target)
     contact_res = {'Mails': M_RE, 'Phones': P_RE}
     loot = []
+
+    pu = urlparse(target)
+
+    ip = gethostbyname(pu.hostname or '')
+    try:
+        loot.append({'Domains': {gethostbyaddr(ip)[0]}})
+    except:
+        pass
+
+    context = _create_unverified_context()
+
+    try:
+        with context.wrap_socket(socket()) as c:
+            c.settimeout(2)
+            c.connect((pu.hostname, pu.port or (443 if pu.scheme == 'https' else 80)))
+
+            ssl_info = c.getpeercert()
+
+            loot.append({'Domains': {v for _, v in ssl_info.get('subjectAltName', {})}})
+    except:
+        pass
 
     check(target, '/', contact_res)
     check(target, RANDOM_PATH, contact_res)
