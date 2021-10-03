@@ -79,12 +79,12 @@ def main(target):
     with suppress():
         with context.wrap_socket(socket()) as c:
             c.connect((pu.hostname, pu.port or 443))
-            ssl_info = c.getpeercert()
-            domains = ssl_info.get('subjectAltName', {})
+            domains = c.getpeercert().get('subjectAltName', {})
             loot.append({'Domains': {v for _, v in domains}})
 
     check(target, '/', contact_res)
     check(target, RANDOM_PATH, contact_res)
+
     response, res = check(target, '/robots.txt', {'Disallows': D_RE})
     for hk, hv in response.headers.lower_items():
         if hk in INTERESTING_HEADERS:
@@ -100,8 +100,9 @@ def main(target):
     print('Vulns:', '-' * 33)
 
     for path in PATHS:
-        _, res = check(target, path)
-        loot.append(res)
+        response, _ = check(target, path)
+        if response.ok:
+            loot.append({'Vulns': {path}})
 
     loot_all = defaultdict(set)
 
